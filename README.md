@@ -1,7 +1,7 @@
-# # Picket Gated Gallery Example
+# Picket Gated Gallery Example
 For this example we’ll be using next.js. While few of the next.js features are needed in this example tutorial, it will create a convenient launching off point for you to build on from this base. It also makes deployment easy through vercel.
 
-1. *Create your next.js app.* 
+1. *Create your next.js app.*<br>
 In your terminal `cd` into the directory where you’d like your project folder to reside and enter the following into the terminal:
 `npx create-next-app@latest —typescript`
 
@@ -10,8 +10,9 @@ Confirm your app is running on localhost by running
 
 Now, when you navigate to `localhost:3000` in your browser you should see the following:
 
-2. Build your home page
+2. Build your home page<br>
 Replace the contents of index.tsx with the following:
+
 ```tsx
 import type { NextPage } from ‘next’
 import Head from ‘next/head’
@@ -73,9 +74,9 @@ Replace the contents of Home.module.css with the following:
 
 When you navigate to localhost:3000 in your browser you should see the following:
 
-[image:9F73E817-CEA5-4FC6-A976-B9D04BF6F3B0-3392-0001A7DF4A4440AF/Screen Shot 2022-03-24 at 10.52.47 AM.png]
+![image](https://picket-static-files.s3.amazonaws.com/login-home.png)
 
-3. Build the gallery page
+3. Build the gallery page<br>
 Next up is creating the page that will only be accessible to those who verify token ownership of the token that you decide to require. For the purposes of this demo we are token gating a photo gallery, however this page could be anything you want to be behind a token gate and after completion it will only be accessible to those who have the required token.
 
 Create a new file called `gallery.tsx`
@@ -187,14 +188,14 @@ Create a file called Gallery.module.css and place the following css inside:
 ```
 
 If you navigate to `localhost:3000/gallery` in your browser while `npm run dev` is running in your terminal you should see the following in your browser:
-[image:8093CCA8-84DE-43B4-938B-C051943938F6-4920-0001CE466CA08345/Screen Shot 2022-04-12 at 1.29.10 PM.png]
 
+![image](https://picket-static-files.s3.amazonaws.com/gallery-unknown-wallet.png)
 
-5. Install Picket
+4. Install Picket<br>
 Now on to the juicy stuff. Let’s make the connect wallet button functional. First thing to do is to install the picket-js library. In your terminal, from within your project directory first make sure you are no longer running your local server by typing `ctrl + c` if you haven’t already.  Then type the following into your terminal: 
 `npm install --save @picketapi/picket-js`
 
-5. Set up the Picket Library in your project
+5. Set up the Picket Library in your project<br>
 Once picket is successfully installed you can import it within your `index.tsx` file by putting the following import statement at the top of your `index.tsx` file and creating a picket object with your api key that you can get from the *dashboard*:
 
 ```js
@@ -202,7 +203,7 @@ import Picket from "@picketapi/picket-js";
 const picket = new Picket("your-api-key-goes-here")
 ```
 
-6. Set up the “connect wallet” button to log in users with picket and token gate the gallery
+6. Set up the “connect wallet” button to log in users with picket and token gate the gallery<br>
 
 Now that you have the picket library installed, the magic method to verify a users’ wallet is the following: 
 ```tsx
@@ -296,12 +297,12 @@ const Home: NextPage = () => {
 export default Home
 ```
 
-7. Try it out
+7. Try it out<br>
 Now, when you run `npm run dev` from the command line and navigate to `localhost:3000` in your browser you should have a working app that lets you tap on the “Connect Wallet” button to initiate a signing request and verify your wallet and token ownership.
 
 Assuming you’re in a browser with Metamask installed, when you click on “Connect Wallet” you should now see the following: 
 
-[image:0CE845D2-B46D-4886-B1E0-97534459191C-3392-0001A7DF4A609ADE/Screen Shot 2022-03-24 at 11.33.42 AM.png]
+![image](https://picket-static-files.s3.amazonaws.com/home-signature-request.png)
 
 And when you click sign, you should be redirected to `localhost:3000/gallery` if and only if you have the minimum balance of of the tokens you specified. 
 
@@ -320,7 +321,7 @@ The returned access token can now be used for the *lifetime of the access token*
 
 Next up, we’ll ensure that the `/gallery` page is only accessible to those with a valid access token that proves they have ownership of the necessary tokens in their verified wallet.
 
-8. Restricting the gallery page to token holders
+8. Restricting the gallery page to token holders<br>
 
 Now that you’re receiving an access token when a user signs in with their wallet and verifies ownership of your token of interest (at least 1 cryptokitty in this example,) we can restrict access to the gallery on the basis of having a valid access token that meets our token ownership requirements. 
 
@@ -417,11 +418,11 @@ export default Home
 
 ```
 
-9. Test it out
+9. Test it out<br>
 When you go to `localhost:3000/` while `npm run dev` is still running in the terminal you should see the home page prompting you to connect your wallet. Connecting your wallet and signing the message should verify your wallet. If you don’t have the required tokens you won’t be granted access. If you do, you’ll be redirected to `localhost:3000/gallery`  where you should see this: 
-[image:B8217E49-9048-4296-871A-B49993C655BD-4920-0001D199B827DC88/Screen Shot 2022-04-12 at 2.32.45 PM.png]
+![image](https://picket-static-files.s3.amazonaws.com/gallery-noahfradin.png)
  
-10. Implement logout
+10. Implement logout<br>
 Picket makes logging out and properly handling the associated cached user information incredibly easy. All you have to do is call `picket.logout()`
 
 To build this into our project, first navigate to `gallery.tsx` in your code editor.  Once there, let’s wrap the `picket.logout()` method in a function you can call from the “Logout” button easily. Add the following which we placed above the useEffect() function for readability:
@@ -519,11 +520,11 @@ export default Gallery
 ```
 
 
-11. Try it out!
+11. Try it out!<br>
 Now, when you navigate to `localhost:3000/gallery` within your browser and click logout you should be taken to the home login page. After logging out, if you then try going to  `localhost:3000/gallery` by typing that into your browser address bar you will again be kicked out back to the home login page because you are not authenticated and authorized. If you try logging in with a wallet that doesn’t have the necessary tokens and token balance you’ll see the same result.
 
 Only logging in with a wallet that has the necessary token balance that you required (in this example that is 1 cryptokitty) will be able to see the gallery. 
 
 Congratulations! You’ve created a fully functional token gated gallery that is only accessible to users who have the necessary token. You can token gate any page using these same methods. 
 
-Check out our other examples to see how you can token gate api endpoints in order to token gate resources themselves. This can be paired with this technique for added security or done on its own to token gate any api endpoint. 
+Check out our other examples to see how you can token gate api endpoints in order to token gate resources themselves. This can be paired with this technique for added security or done on its own to token gate any api endpoint.
