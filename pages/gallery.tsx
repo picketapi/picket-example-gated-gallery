@@ -5,7 +5,7 @@ import styles from '../styles/Gallery.module.css'
 import { useState, useEffect } from "react";
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+const apiKey = "pk_your_publishable_api_key_here"
 
 const Gallery: NextPage = () => {
 
