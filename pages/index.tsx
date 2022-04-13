@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk-your-key-goes-here"
+const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
 const picket = new Picket(apiKey)
 
 const Home: NextPage = () => {
@@ -14,7 +14,7 @@ const Home: NextPage = () => {
       ///Do whatever you’d like to do after a successful login/
       location.href = "/gallery"
     } catch (err) {
-		//Error case
+		  //Error case
       console.error(err);
     }
   };

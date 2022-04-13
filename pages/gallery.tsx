@@ -4,20 +4,39 @@ import styles from '../styles/Gallery.module.css'
 
 import { useState, useEffect } from "react";
 
-const Home: NextPage = () => {
+import Picket from "@picketapi/picket-js";
+const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
 
-  const [walletAddress, setWalletAddress] = useState("");
+const Gallery: NextPage = () => {
+
+  const [displayAddress, setDisplayAddress] = useState("");
   const [imageList, setImageList] = useState([]);
 
+  const picket = new Picket(apiKey)
+
+  const onLogout = async () => {
+    try {
+      await picket.logout();
+    } catch (err) {
+		  //Error case
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-      const loginObject = localStorage.getItem("_picketauth")
-      if(!loginObject){
-        location.href = "/";
-      }else{
-        setWalletAddress(JSON.parse(localStorage.getItem("_picketauth")).user.walletAddress);
+      async function checkAccessAndLoad(){
+        const loginObject = JSON.parse(localStorage.getItem("_picketauth"))
+        try{
+          await picket.validate(loginObject.accessToken)
+        }catch{
+          location.href="/";
+        }
+        setDisplayAddress(loginObject.user.displayAddress);
         setImageList(["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"])
       }
+      checkAccessAndLoad();
   })
+
 
   return (
     <div className={styles.container}>
@@ -28,8 +47,11 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.welcomeHeader}>Hey {walletAddress}</h1>
-        <h2>In honor of your first token gate, check out these gates and gators.</h2>
+        <div className={styles.headerContainer}>
+          <h2 className={styles.welcomeHeader}>Hey {displayAddress}</h2>
+          <button className={styles.logoutButton} onClick={onLogout}>Logout</button>
+        </div>
+        <h3>In honor of your first token gate, check out these gates and gators.</h3>
         <div className={styles.gallery}>
             <img className={styles.galleryImage} src={imageList[0]} alt="" />
             <img className={styles.galleryImage} src={imageList[1]} alt="" />        
@@ -41,4 +63,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default Gallery
