@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+const apiKey = "pk_your_publishable_api_key_here"
 const picket = new Picket(apiKey)
 
 const Home: NextPage = () => {
