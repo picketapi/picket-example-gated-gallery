@@ -4,39 +4,38 @@ import styles from '../styles/Gallery.module.css'
 
 import { useState, useEffect } from "react";
 
-import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+import { usePicket } from "@picketapi/picket-react";
+import { useRouter } from 'next/router';
 
 const Gallery: NextPage = () => {
 
-  const [displayAddress, setDisplayAddress] = useState("");
-  const [imageList, setImageList] = useState([]);
+  const router = useRouter();
 
-  const picket = new Picket(apiKey)
+  const { isAuthenticated, authState, logout } =
+    usePicket();
 
   const onLogout = async () => {
     try {
-      await picket.logout();
+      await logout();
+
+      router.push("/");
     } catch (err) {
 		  //Error case
       console.error(err);
     }
   };
 
-  useEffect(() => {
-      async function checkAccessAndLoad(){
-        const loginObject = JSON.parse(localStorage.getItem("_picketauth"))
-        try{
-          await picket.validate(loginObject.accessToken)
-        }catch{
-          location.href="/";
-        }
-        setDisplayAddress(loginObject.user.displayAddress);
-        setImageList(["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"])
-      }
-      checkAccessAndLoad();
-  })
-
+  if(!isAuthenticated){
+    return (
+      <p> Hello, you don't have access to view this page.</p>
+    )
+  }
+  
+  const { user } = authState;
+  const { displayAddress } = user;
+  
+  //The static content
+  const imageList = ["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"];
 
   return (
     <div className={styles.container}>

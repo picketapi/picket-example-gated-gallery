@@ -91,7 +91,7 @@ import styles from '../styles/Gallery.module.css'
 import { useState, useEffect } from "react";
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+const apiKey = "pk_your_publishable_key_goes_here"
 
 const Gallery: NextPage = () => {
 
@@ -257,7 +257,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk-your-key-goes-here"
+const apiKey = "pk_your_publishable_key_goes_here"
 const picket = new Picket(apiKey)
 
 const Home: NextPage = () => {
@@ -369,7 +369,7 @@ import styles from '../styles/Gallery.module.css'
 import { useState, useEffect } from "react";
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+const apiKey = "pk_your_key_goes_here"
 
 const Gallery: NextPage = () => {
 
@@ -457,7 +457,7 @@ import styles from '../styles/Gallery.module.css'
 import { useState, useEffect } from "react";
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+const apiKey = "pk_your_publishable_key_goes_here"
 
 const Gallery: NextPage = () => {
 
