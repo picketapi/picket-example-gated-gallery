@@ -3,21 +3,40 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 import Picket from "@picketapi/picket-js";
-const apiKey = "pk_your_publishable_api_key_here"
+const apiKey = "pk_your_publishable_key_goes_here"
 const picket = new Picket(apiKey)
+
+import { defaultLoginRedirectCallback } from "@picketapi/picket-js";
+import { useEffect } from "react";
 
 const Home: NextPage = () => {
 
   const onLogin = async () => {
     try {
-      const loginObject = await picket.login();
-      ///Do whatever you’d like to do after a successful login/
-      location.href = "/gallery"
+      await picket.login();
     } catch (err) {
 		  //Error case
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    async function handleRedirect () {
+      try {
+        const { appState } = await picket.handleLoginRedirect();
+        defaultLoginRedirectCallback(appState);
+
+        //Do anything after a successful login
+        location.href = "/gallery"
+      }catch(err){
+        //Error case
+        console.log(err)
+      }
+    }
+  
+    handleRedirect()
+})
+  
   
   return (
     <div className={styles.container}>
