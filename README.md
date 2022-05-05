@@ -1,7 +1,9 @@
-# Picket Gated Gallery Example
-For this example we’ll be using next.js. While few of the next.js features are needed in this example tutorial, it will create a convenient launching off point for you to build on from this base. It also makes deployment easy through vercel.
 
-1. *Create your next.js app.*<br>
+# Picket Gated Gallery Example
+For this example we’ll be using [Next.js](https://nextjs.org/). While few of the [Next.js](https://nextjs.org/) features are needed in this example tutorial, it will create a convenient launching off point for you to build on from this base. It also makes deployment easy through [Vercel](https://vercel.com/).
+
+## 1. Create your Next.js app
+
 In your terminal `cd` into the directory where you’d like your project folder to reside and enter the following into the terminal:
 `npx create-next-app@latest —typescript`
 
@@ -10,32 +12,119 @@ Confirm your app is running on localhost by running
 
 Now, when you navigate to `localhost:3000` in your browser you should see the following:
 
-2. Build your home page<br>
-Replace the contents of index.tsx with the following:
+## 2. Install the Picket React SDK
+
+```shell
+npm install "@picketapi/picket-react"
+```
+## 3. Setup the Picket Provider
+
+Replace the contents of `pages/_app.tsx` with the following:
 
 ```tsx
-import type { NextPage } from ‘next’
-import Head from ‘next/head’
-import styles from ‘../styles/Home.module.css’
+import "../styles/globals.css";
+import type { AppProps } from "next/app";
 
-const Home: NextPage = () => {
+import { PicketProvider } from "@picketapi/picket-react";
+
+const apiKey = "YOUR_PUBLISHABLE_KEY_GOES_HERE";
+
+function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Picket Hello World</title>
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Connect your wallet to login
-        </h1>
-        <button className={styles.connectWalletButton}>Connect Wallet</button>
-      </main>
-    </div>
-  )
+    <PicketProvider apiKey={apiKey}>
+      <Component {...pageProps} />
+    </PicketProvider>
+  );
 }
 
-export default Home
+export default MyApp
+```
+
+The `PicketProvider`  makes Picket and the user's authentication state available throughout your app via the `usePicket` hook.
+
+## 4. Build your home page
+Replace the contents of `pages/index.tsx` with the following:
+
+```tsx
+import { useEffect } from "react";
+import type { NextPage } from "next";
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import galleryStyles from "../styles/Gallery.module.css";
+
+import { usePicket } from "@picketapi/picket-react";
+
+import { useRouter } from "next/router";
+
+const Header = () => (
+  <Head>
+    <title>Picket Gated Gallery</title>
+    <meta name="description" content="Saying hello to a web3 world" />
+    <link rel="icon" href="/favicon.ico" />
+  </Head>
+);
+
+// TODO: Replace with your requirements of choice!
+const loginRequirements = {
+  // Replace this example address with whichever contract you are verifying ownership for
+  contractAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  // Replace with minimum balance you want to verify users' currently hold,
+  // or omit if any number of tokens is sufficient
+  minTokenBalance: 1,
+};
+
+const Home: NextPage = () => {
+  const { isAuthenticating, isAuthenticated, authState, logout, login } =
+    usePicket();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    // on login, redirect to gallery
+    if (isAuthenticated) router.push("/gallery");
+  }, [router, isAuthenticated]);
+
+  // user is logging in
+  if (isAuthenticating)
+    return (
+      <div className={styles.container}>
+        <Header />
+        <main className={styles.main}>
+          <h1 className={styles.title}>Connecting...</h1>
+        </main>
+      </div>
+    );
+
+  // user is not logged in
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <Header />
+        <main className={styles.main}>
+          <h1 className={styles.title}>Connect your wallet to login</h1>
+          <button
+            className={styles.connectWalletButton}
+            onClick={() => login(loginRequirements)}
+          >
+            Connect Wallet
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  // user is authenticated, so we should be redirecting to the gallery
+  return (
+    <div className={styles.container}>
+      <Header />
+      <main className={styles.main}>
+        <h1 className={styles.title}>Redirecting to the gallery...</h1>
+      </main>
+    </div>
+  );
+};
+
+export default Home;
 ```
 
 Replace the contents of Home.module.css with the following:
@@ -69,42 +158,61 @@ Replace the contents of Home.module.css with the following:
   color: white;
   font-weight: 800;
 }
-
 ```
 
-When you navigate to localhost:3000 in your browser you should see the following:
+When you navigate to http://localhost:3000 in your browser you should see the following:
 
 ![image](https://picket-static-files.s3.amazonaws.com/login-home.png)
 
-3. Build the gallery page<br>
-Next up is creating the page that will only be accessible to those who verify token ownership of the token that you decide to require. For the purposes of this demo we are token gating a photo gallery, however this page could be anything you want to be behind a token gate and after completion it will only be accessible to those who have the required token.
+## 5. Build the token-gated gallery page
+Now, let's create the page that will only be accessible to those who verify token ownership of the required ERC20, ERC721, or ERC1155 token(s). For the purposes of this demo we are token-gate a photo gallery; however this page could be anything you want. It could be a live video stream, exclusive merchandise, or whatever else you dream up!
 
-Create a new file called `gallery.tsx`
+Create a new file  `pages/gallery.tsx`
 
-Place the following code into `gallery.tsx`. It renders 5 photos we picked from across the internet for this example.
+Place the following code into `pages/gallery.tsx`. It renders 5 photos we picked from across the internet for this example.
 
-```js
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Gallery.module.css'
+```tsx
+import type { NextPage } from "next";
+import Head from "next/head";
+import Image from "next/image";
+import styles from "../styles/Gallery.module.css";
 
 import { useState, useEffect } from "react";
 
-import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
+import { usePicket } from "@picketapi/picket-react";
+import { useRouter } from "next/router";
+
+//The static content
+const images = [
+  "https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e",
+  "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=",
+  "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg",
+  "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg",
+].map((src) => (
+  <Image
+    key={src}
+    className={styles.galleryImage}
+    src={src}
+    alt="Gates, gators, and pickets"
+  />
+));
 
 const Gallery: NextPage = () => {
+  const router = useRouter();
 
-  const [displayAddress, setDisplayAddress] = useState("");
-  const [imageList, setImageList] = useState([]);
+  const { isAuthenticated, authState, logout } = usePicket();
 
-  const picket = new Picket(apiKey)
+  const onLogout = async () => {
+    await logout();
+    router.push("/");
+  };
 
-  useEffect(() => {
-        setDisplayAddress("unknown user");
-    setImageList(["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"])
-  })
+  if (!isAuthenticated) {
+    return <p> Hello, you don{"'"}t have access to view this page.</p>;
+  }
 
+  const { user } = authState;
+  const { displayAddress } = user;
 
   return (
     <div className={styles.container}>
@@ -117,21 +225,20 @@ const Gallery: NextPage = () => {
       <main className={styles.main}>
         <div className={styles.headerContainer}>
           <h2 className={styles.welcomeHeader}>Hey {displayAddress}</h2>
-          <button className={styles.logoutButton} onClick={onLogout}>Logout</button>
+          <button className={styles.logoutButton} onClick={onLogout}>
+            Logout
+          </button>
         </div>
-        <h3>"In honor of your first token gate, check out these gates and gators."</h3>
-        <div className={styles.gallery}>
-            <img className={styles.galleryImage} src={imageList[0]} alt="" />
-            <img className={styles.galleryImage} src={imageList[1]} alt="" />        
-            <img className={styles.galleryImage} src={imageList[2]} alt="" />
-            <img className={styles.galleryImage} src={imageList[3]} alt="" />
-        </div>
+        <h3>
+          In honor of your first token gate, check out these gates and gators.
+        </h3>
+        <div className={styles.gallery}>{images}</div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Gallery
+export default Gallery;
 ```
 
 Create a file called Gallery.module.css and place the following css inside:
@@ -187,344 +294,55 @@ Create a file called Gallery.module.css and place the following css inside:
 }
 ```
 
-If you navigate to `localhost:3000/gallery` in your browser while `npm run dev` is running in your terminal you should see the following in your browser:
+This page will be available at http://localhost:3000/gallery, but to access it, we need to setup [Picket](https://picketapi.com/).
 
 ![image](https://picket-static-files.s3.amazonaws.com/gallery-unknown-wallet.png)
 
-4. Install Picket<br>
-Now on to the juicy stuff. Let’s make the connect wallet button functional. First thing to do is to install the picket-js library. In your terminal, from within your project directory first make sure you are no longer running your local server by typing `ctrl + c` if you haven’t already.  Then type the following into your terminal: 
-`npm install --save @picketapi/picket-js`
+## 6. Let's make it real!
+Now on to the juicy stuff. Let’s make the connect wallet button functional. Navigate to your [Picket account dashboard](https://picketapi.com/dashboard) and copy your publishable key from a project. Now paste it into the `pages/_app.tsx`
 
-5. Set up the Picket Library in your project<br>
-Once picket is successfully installed you can import it within your `index.tsx` file by putting the following import statement at the top of your `index.tsx` file and creating a picket object with your api key that you can get from the *dashboard*:
-
-```js
-import Picket from "@picketapi/picket-js";
-const picket = new Picket("your-api-key-goes-here")
-```
-
-6. Set up the “connect wallet” button to log in users with picket and token gate the gallery<br>
-
-Now that you have the picket library installed, the magic method to verify a users’ wallet is the following: 
 ```tsx
-await picket.login()
+// in pages/_app.tsx
+// Replace with your copied publishable key
+const apiKey = "YOUR_PUBLISHABLE_KEY_GOES_HERE";
 ```
 
-To verify token ownership we simply need to pass in the contract address of the token that we’d like to ensure users have as well as the minimum balance we want to ensure users have of the token. For the purposes of this demo we’ll be using cryptokitties ([CryptoKitties - Collection | OpenSea](https://opensea.io/collection/cryptokitties)) as the token users must have to enter the gallery page. However, you can use any ERC-20, ERC-721 or ERC-1155 token when using the `ethereum-mainnet`  chain that picket defaults to.
+## 7. Whitelist our app's redirect URI
 
-The contract address for cryptokitties is: `0x06012c8cf97BEaD5deAe237070F9587f8E7A266d`
+Go back to your [Picket account dashboard](https://picketapi.com/dashboard) and click `Edit` on your project. Add the following redirect URI
+- http://localhost:3000/ (trailing slash matters!)
 
-If you’re not sure what the contract address is for your token of interest, etherscan ([Ethereum (ETH) Blockchain Explorer](https://etherscan.io/)) is a great resource where you can search for your token of interest and get the contract address among many other pieces of data.
+After adding the redirect URI for our app, click the `Save` button to save your changes to the project. Nice! Now we are ready to add token ownership requirements.
 
-To verify token ownership it’s as simple as updating the login function to take in the contract address and minBalance like so: 
+## 8. Add Token Ownership Requirements
 
-```js
-await picket.login({
-	contractAddress: "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d",
-	minTokenBalance: 1
-})
-```
+To enforce token ownership, we pass the requirements to the [login](https://docs.picketapi.com/picket-docs/reference/libraries-and-sdks/javascript-library-picket-js#login) function. For this tutorial, we will use [CryptoKitties](https://opensea.io/collection/cryptokitties)) to token-gate our gallery. Users will need to own at least one CryptoKitty NFT token to access the gallery page. Picket works with any ERC-20, ERC-721 or ERC-1155 token on the `ethereum-mainnet` .  You'll want to pick a token contract that your wallet owns to test out the token-gating functionality yourself.
 
-This not only verifies ownership of the wallet, but also checks to ensure the wallet has a minimum of one token from the cryptokitties contract (`0x06012c8cf97BEaD5deAe237070F9587f8E7A266d`.)
+The contract address for CryptoKitties is: `0x06012c8cf97BEaD5deAe237070F9587f8E7A266d`
 
-Let’s wrap that method in a function you can call from the “Connect Wallet” button. Still within `index.ts`, place the following within the function for the `NextPage` titled `Home`, above the return statement.
-```tsx
-const onLogin = async () => {
-    try {
-      const loginObject = await picket.login({
-			contractAddress: "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d",
-			minTokenBalance: 1
-		});
-      ///Do whatever you’d like to do after a successful login and token ownership validation
-      location.href = "/gallery"
-    } catch (err) {
-    	//Error case
-    	console.error(err);
-    }
-  };
+If you’re not sure what the contract address is for your token is, [Etherscan](https://etherscan.io/) is a great resources. It'll give you information about any ERC-20, ERC-721, ERC-1155 token.
 
-```
+Now, let's update the login (aka token ownership) requirements in `pages/index.tsx`
 
-And then within the html declaration of the “Connect Wallet” button, update it with an onclick event that calls the above method like so: 
-```html
-<button className={styles.connectWalletButton} onClick={onLogin}>Connect Wallet</button>
-```
-
-After this, your index.tsx file should look like this:
-```tsx
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
-
-import Picket from "@picketapi/picket-js";
-const apiKey = "pk-your-key-goes-here"
-const picket = new Picket(apiKey)
-
-const Home: NextPage = () => {
-
-  const onLogin = async () => {
-    try {
-      const loginObject = await picket.login({
-			contractAddress: "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d",
-			minTokenBalance: 1
-		});
-      ///Do whatever you’d like to do after a successful login and token ownership validation
-      location.href = "/gallery"
-    } catch (err) {
-    	//Error case
-      console.error(err);
-    }
-  };
-  
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Picket Hello World</title>
-        <meta name="description” content=“Saying hello to a web3 world" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Connect your wallet to login
-        </h1>
-        <button className={styles.connectWalletButton} onClick={onLogin}>Connect Wallet</button>
-      </main>
-    </div>
-  )
-}
-
-export default Home
-```
-
-7. Try it out<br>
-Now, when you run `npm run dev` from the command line and navigate to `localhost:3000` in your browser you should have a working app that lets you tap on the “Connect Wallet” button to initiate a signing request and verify your wallet and token ownership.
-
-Assuming you’re in a browser with Metamask installed, when you click on “Connect Wallet” you should now see the following: 
-
-![image](https://picket-static-files.s3.amazonaws.com/home-signature-request.png)
-
-And when you click sign, you should be redirected to `localhost:3000/gallery` if and only if you have the minimum balance of of the tokens you specified. 
-
-The wallet address, display address (ex. ENS name) and access token are returned by the `picket.login()` method in the following format:
-```json
-{
-    accessToken: "ACCESS_TOKEN",
-    user: {
-        walletAddress: "0xWALLET_ADDRESS",
-		  displayAddress: "ENS_NAME"
-    }
-}
-```
-
-The returned access token can now be used for the *lifetime of the access token* to *validate* a user’s wallet and token ownership without needing to ask the user to sign another request. However, right now we’re not doing anything with the access token and `localhost:3000/gallery` can be accessed by anyone who knows the url. 
-
-Next up, we’ll ensure that the `/gallery` page is only accessible to those with a valid access token that proves they have ownership of the necessary tokens in their verified wallet.
-
-8. Restricting the gallery page to token holders<br>
-
-Now that you’re receiving an access token when a user signs in with their wallet and verifies ownership of your token of interest (at least 1 cryptokitty in this example,) we can restrict access to the gallery on the basis of having a valid access token that meets our token ownership requirements. 
-
-To do this we use the `picket.validate()` function. This functions validates the access token is in fact a valid picket access token that was issued specifically for your project and that it meets any requirements that you provided. 
-
-Navigate back to the `gallery.tsx` file. and find the section where we’re using useEffect() to set the displayName and image list on the client side. Replace the contents of UseEffect() so that it looks like this:   
-```js
-     useEffect(() => {
-      async function checkAccessAndLoad(){
-        try{
-          await picket.validate(loginObject.accessToken, "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d", 1)
-        }catch{
-          location.href="/";
-        }
-      }
-      checkAccessAndLoad();
-  })
-```
-
-This code gets the picket  response object that was stored in local storage by the picket-js library and stores it as loginObject with this line: 
 ```ts
-const loginObject = JSON.parse(localStorage.getItem("_picketauth"))
+// at the top of pages/index.tsx
+// TODO: Replace with your requirements of choice!
+const loginRequirements = {
+  // Replace this example address with whichever contract you are verifying ownership for
+  contractAddress: "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d",
+  // Replace with minimum balance you want to verify users' currently hold,
+  // or omit if any number of tokens is sufficient
+  minTokenBalance: 1,
+};
 ```
+`minTokenBalane` lets us not only verify token ownership, but require a minimum amount of tokens. 
 
-It then tries to validate the accessToken and the token ownership requirements by calling:
-```ts
-await picket.validate(loginObject.accessToken, "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d", 1)
-```
+## 9. Try it out!
+Now, when you run `npm run dev` from the command line and navigate to http://localhost:3000 in your browser you should have a working app that lets you tap on the “Connect Wallet” button to initiate a signing request and verify your wallet and token ownership.
 
-If picket is unable to validate the access token, or if the user doesn’t have an access token it kicks them back out to the home login page.
+If all goes well, and you meet the token ownership requirements, you'll see the following page: 
 
-Next up is to load the content only once a user has proven they have a validated access token. And we can personalize the experience based on the connected wallet by fetching the user’s display name from 
-`loginObject.user.displayAddress`  and displaying that to the user. In this example we will display the images and update the header to welcome the user with their displayName (ENS or walletAddress depending on what the wallet has set up) after we have validated the access token so that the final useEffect method should look like this: 
-```ts
-        setDisplayAddress(loginObject.user.displayAddress);
-        setImageList(["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"])
-```
-
-Your final `gallery.tsx` file should now look like this: 
-```tsx
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Gallery.module.css'
-
-import { useState, useEffect } from "react";
-
-import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
-
-const Gallery: NextPage = () => {
-
-  const [displayAddress, setDisplayAddress] = useState("");
-  const [imageList, setImageList] = useState([]);
-
-  const picket = new Picket(apiKey)
-
-  useEffect(() => {
-      async function checkAccessAndLoad(){
-        const loginObject = JSON.parse(localStorage.getItem("_picketauth"))
-        try{
-          await picket.validate(loginObject.accessToken)
-        }catch{
-          location.href="/";
-        }
-        setDisplayAddress(loginObject.user.displayAddress);
-        setImageList(["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"])
-      }
-      checkAccessAndLoad();
-  })
-
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Picket Hello World</title>
-        <meta name="description” content=“Saying hello to a web3 world" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.welcomeHeader}>Hey {displayAddress}</h1>
-        <h2>In honor of your first token gate, check out these gates and gators.</h2>
-        <div className={styles.gallery}>
-            <img className={styles.galleryImage} src={imageList[0]} alt="" />
-            <img className={styles.galleryImage} src={imageList[1]} alt="" />        
-            <img className={styles.galleryImage} src={imageList[2]} alt="" />
-            <img className={styles.galleryImage} src={imageList[3]} alt="" />
-        </div>
-      </main>
-    </div>
-  )
-}
-
-export default Home
-
-```
-
-9. Test it out<br>
-When you go to `localhost:3000/` while `npm run dev` is still running in the terminal you should see the home page prompting you to connect your wallet. Connecting your wallet and signing the message should verify your wallet. If you don’t have the required tokens you won’t be granted access. If you do, you’ll be redirected to `localhost:3000/gallery`  where you should see this: 
 ![image](https://picket-static-files.s3.amazonaws.com/gallery-noahfradin.png)
  
-10. Implement logout<br>
-Picket makes logging out and properly handling the associated cached user information incredibly easy. All you have to do is call `picket.logout()`
 
-To build this into our project, first navigate to `gallery.tsx` in your code editor.  Once there, let’s wrap the `picket.logout()` method in a function you can call from the “Logout” button easily. Add the following which we placed above the useEffect() function for readability:
-
-```tsx
-const onLogout = async () => {
-    try {
-      await picket.logout();
-    } catch (err) {
-      //Error case
-      console.error(err);
-    }
-  };
-```
-
-Then, find the logout button in the same `gallery.tsx` file:
-```tsx
-<button className={styles.logoutButton}>Logout</button>
-```
-Add `onLogout` as an `onClick` event like so:
-```tsx
-<button className={styles.logoutButton} onClick={onLogout}
->Logout</button>
-```
-
-After this your `gallery.tsx` file should look like this:
-```tsx
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Gallery.module.css'
-
-import { useState, useEffect } from "react";
-
-import Picket from "@picketapi/picket-js";
-const apiKey = "pk_549db9e7d16266b3334e00baf6e9a46b"
-
-const Gallery: NextPage = () => {
-
-  const [displayAddress, setDisplayAddress] = useState("");
-  const [imageList, setImageList] = useState([]);
-
-  const picket = new Picket(apiKey)
-
-  const onLogout = async () => {
-    try {
-      await picket.logout();
-    } catch (err) {
-      //Error case
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-      async function checkAccessAndLoad(){
-        const loginObject = JSON.parse(localStorage.getItem("_picketauth"))
-        try{
-          await picket.validate(loginObject.accessToken)
-        }catch{
-          location.href="/";
-        }
-        setDisplayAddress(loginObject.user.displayAddress);
-        setImageList(["https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e", "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=", "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg", "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg"])
-      }
-      checkAccessAndLoad();
-  })
-
-
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Picket Hello World</title>
-        <meta name="description” content=“Saying hello to a web3 world" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <div className={styles.headerContainer}>
-          <h2 className={styles.welcomeHeader}>Hey {displayAddress}</h2>
-          <button className={styles.logoutButton} onClick={onLogout}>Logout</button>
-        </div>
-        <h3>In honor of your first token gate, check out these gates and gators.</h3>
-        <div className={styles.gallery}>
-            <img className={styles.galleryImage} src={imageList[0]} alt="" />
-            <img className={styles.galleryImage} src={imageList[1]} alt="" />        
-            <img className={styles.galleryImage} src={imageList[2]} alt="" />
-            <img className={styles.galleryImage} src={imageList[3]} alt="" />
-        </div>
-      </main>
-    </div>
-  )
-}
-
-export default Gallery
-
-```
-
-
-11. Try it out!<br>
-Now, when you navigate to `localhost:3000/gallery` within your browser and click logout you should be taken to the home login page. After logging out, if you then try going to  `localhost:3000/gallery` by typing that into your browser address bar you will again be kicked out back to the home login page because you are not authenticated and authorized. If you try logging in with a wallet that doesn’t have the necessary tokens and token balance you’ll see the same result.
-
-Only logging in with a wallet that has the necessary token balance that you required (in this example that is 1 cryptokitty) will be able to see the gallery. 
-
-Congratulations! You’ve created a fully functional token gated gallery that is only accessible to users who have the necessary token. You can token gate any page using these same methods. 
-
-Check out our other examples to see how you can token gate api endpoints in order to token gate resources themselves. This can be paired with this technique for added security or done on its own to token gate any api endpoint.
+Congratulations! You’ve created a fully functional token gated gallery that is only accessible to users who have the necessary token. You can token gate any page or APIs using these same methods.

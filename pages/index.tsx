@@ -1,40 +1,79 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useEffect } from "react";
+import type { NextPage } from "next";
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import galleryStyles from "../styles/Gallery.module.css";
 
-import Picket from "@picketapi/picket-js";
-const apiKey = "pk_your_publishable_api_key_here"
-const picket = new Picket(apiKey)
+import { usePicket } from "@picketapi/picket-react";
+
+import { useRouter } from "next/router";
+
+const Header = () => (
+  <Head>
+    <title>Picket Gated Gallery</title>
+    <meta name="description" content="Saying hello to a web3 world" />
+    <link rel="icon" href="/favicon.ico" />
+  </Head>
+);
+
+// TODO: Replace with your requirements of choice!
+const loginRequirements = {
+  // Replace this example address with whichever contract you are verifying ownership for
+  contractAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  // Replace with minimum balance you want to verify users' currently hold,
+  // or omit if any number of tokens is sufficient
+  minTokenBalance: 1,
+};
 
 const Home: NextPage = () => {
+  const { isAuthenticating, isAuthenticated, authState, logout, login } =
+    usePicket();
 
-  const onLogin = async () => {
-    try {
-      const loginObject = await picket.login();
-      ///Do whatever you’d like to do after a successful login/
-      location.href = "/gallery"
-    } catch (err) {
-		  //Error case
-      console.error(err);
-    }
-  };
-  
+  const router = useRouter();
+
+  useEffect(() => {
+    // on login, redirect to gallery
+    if (isAuthenticated) router.push("/gallery");
+  }, [router, isAuthenticated]);
+
+  // user is logging in
+  if (isAuthenticating)
+    return (
+      <div className={styles.container}>
+        <Header />
+        <main className={styles.main}>
+          <h1 className={styles.title}>Connecting...</h1>
+        </main>
+      </div>
+    );
+
+  // user is not logged in
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <Header />
+        <main className={styles.main}>
+          <h1 className={styles.title}>Connect your wallet to login</h1>
+          <button
+            className={styles.connectWalletButton}
+            onClick={() => login(loginRequirements)}
+          >
+            Connect Wallet
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  // user is authenticated, so we should be redirecting to the gallery
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Picket Hello World</title>
-        <meta name="description” content=“Saying hello to a web3 world" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
+      <Header />
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Connect your wallet to login
-        </h1>
-        <button className={styles.connectWalletButton} onClick={onLogin}>Connect Wallet</button>
+        <h1 className={styles.title}>Redirecting to the gallery...</h1>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
