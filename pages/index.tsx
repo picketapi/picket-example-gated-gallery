@@ -16,6 +16,15 @@ const Header = () => (
   </Head>
 );
 
+// TODO: Replace with your requirements of choice!
+const loginRequirements = {
+  // Replace this example address with whichever contract you are verifying ownership for
+  contractAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  // Replace with minimum balance you want to verify users' currently hold,
+  // or omit if any number of tokens is sufficient
+  minTokenBalance: 1,
+};
+
 const Home: NextPage = () => {
   const { isAuthenticating, isAuthenticated, authState, logout, login } =
     usePicket();
@@ -26,23 +35,6 @@ const Home: NextPage = () => {
     // on login, redirect to gallery
     if (isAuthenticated) router.push("/gallery");
   }, [router, isAuthenticated]);
-
-  const requirements = {
-    // Replace this example address with whichever contract you are verifying ownership for
-    contractAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    // Replace with minimum balance you want to verify users' currently hold,
-    // or omit if any number of tokens is sufficient
-    minTokenBalance: 1,
-  };
-
-  const onLogout = async () => {
-    try {
-      await logout();
-    } catch (err) {
-      //Error case
-      console.error(err);
-    }
-  };
 
   // user is logging in
   if (isAuthenticating)
@@ -64,7 +56,7 @@ const Home: NextPage = () => {
           <h1 className={styles.title}>Connect your wallet to login</h1>
           <button
             className={styles.connectWalletButton}
-            onClick={() => login(requirements)}
+            onClick={() => login(loginRequirements)}
           >
             Connect Wallet
           </button>
@@ -73,8 +65,7 @@ const Home: NextPage = () => {
     );
   }
 
-  router.push("/gallery");
-
+  // user is authenticated, so we should be redirecting to the gallery
   return (
     <div className={styles.container}>
       <Header />

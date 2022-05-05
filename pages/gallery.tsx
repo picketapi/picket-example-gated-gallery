@@ -8,6 +8,21 @@ import { useState, useEffect } from "react";
 import { usePicket } from "@picketapi/picket-react";
 import { useRouter } from "next/router";
 
+//The static content
+const images = [
+  "https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e",
+  "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=",
+  "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg",
+  "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg",
+].map((src) => (
+  <Image
+    key={src}
+    className={styles.galleryImage}
+    src={src}
+    alt="Gates, gators, and pickets"
+  />
+));
+
 const Gallery: NextPage = () => {
   const router = useRouter();
 
@@ -24,21 +39,6 @@ const Gallery: NextPage = () => {
 
   const { user } = authState;
   const { displayAddress } = user;
-
-  //The static content
-  const images = [
-    "https://d113wk4ga3f0l0.cloudfront.net/c?o=eJw1jckOwiAYhN-Fc0tZ7GIfxGuD8LdFQAhLGmN8dzHqXCaTzHzzRMmXKGEx8EAzYh2f6GlgQ8cIHcnIBjrxnrCOVPF-oZwPbdteICahrYWEb2FDzR9yLdJArhzpHbZ623PKXhqsndhqtwTrhUo4RK-KzNrf6_R7vPbrys81HlrlHc3TmTRohw_iFzK4YEWGWj6qRSeiAUUoer0BDKg-EA==&s=8cf1f7196f11d90d319520508d9ccca97dbbee8e",
-    "https://media.istockphoto.com/photos/historic-bodiam-castle-and-moat-in-east-sussex-picture-id1159222432?k=20&m=1159222432&s=612x612&w=0&h=b061l6yVknGCaWgqQ2wovC9QZ4GWD6U313RnLAojDbk=",
-    "https://t3.ftcdn.net/jpg/02/90/36/94/360_F_290369428_lFZSlGFGl964s8Uy30eyxX0FLLKulwCN.jpg",
-    "https://fallstonfence.com/wp-content/uploads/2019/06/wood-fence.jpeg",
-  ].map((src) => (
-    <Image
-      key={src}
-      className={styles.galleryImage}
-      src={src}
-      alt="Gates, gators, and pickets"
-    />
-  ));
 
   return (
     <div className={styles.container}>
