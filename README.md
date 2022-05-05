@@ -10,7 +10,7 @@ In your terminal `cd` into the directory where you’d like your project folder 
 Confirm your app is running on localhost by running
  `npm run dev`
 
-Now, when you navigate to `localhost:3000` in your browser you should see the following:
+Now, when you navigate to http://localhost:3000 in your browser you should see the following:
 
 ## 2. Install the Picket React SDK
 
@@ -320,7 +320,7 @@ To enforce token ownership, we pass the requirements to the [login](https://docs
 
 The contract address for CryptoKitties is: `0x06012c8cf97BEaD5deAe237070F9587f8E7A266d`
 
-If you’re not sure what the contract address is for your token is, [Etherscan](https://etherscan.io/) is a great resources. It'll give you information about any ERC-20, ERC-721, ERC-1155 token.
+If you’re not sure what the contract address is for your token is, [Etherscan](https://etherscan.io/) is a great resource. It'll give you information about any ERC-20, ERC-721, ERC-1155 token.
 
 Now, let's update the login (aka token ownership) requirements in `pages/index.tsx`
 
