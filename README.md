@@ -126,6 +126,7 @@ const Home: NextPage = () => {
 
 export default Home;
 ```
+The magic method here to initiate logging in a user is picket.login() which can be found in the case where a user is not logged in and triggered when a user clicks on the connect wallet button. To enable token gating beyond simple wallet auth is as simple as passing in requirements to this login function. We'll go over this later on in the tutorial.
 
 Replace the contents of Home.module.css with the following:
 ```css
@@ -299,7 +300,7 @@ This page will be available at http://localhost:3000/gallery, but to access it, 
 ![image](https://picket-static-files.s3.amazonaws.com/gallery-unknown-wallet.png)
 
 ## 6. Let's make it real!
-Now on to the juicy stuff. Let’s make the connect wallet button functional. Navigate to your [Picket account dashboard](https://picketapi.com/dashboard) and copy your publishable key from a project. Now paste it into the `pages/_app.tsx`
+You'll need to add your API Key in order to make this functional. Navigate to your [Picket account dashboard](https://picketapi.com/dashboard) and copy your publishable key from a project. Now paste it into the `pages/_app.tsx`
 
 ```tsx
 // in pages/_app.tsx
@@ -313,6 +314,8 @@ Go back to your [Picket account dashboard](https://picketapi.com/dashboard) and 
 - http://localhost:3000/ (trailing slash matters!)
 
 After adding the redirect URI for our app, click the `Save` button to save your changes to the project. Nice! Now we are ready to add token ownership requirements.
+
+Note that if you host this project elsewhere (not on localhost) you will have to add a redirect url that matches the url of wherever your code is hosted. 
 
 ## 8. Add Token Ownership Requirements
 
@@ -335,7 +338,7 @@ const loginRequirements = {
   minTokenBalance: 1,
 };
 ```
-`minTokenBalane` lets us not only verify token ownership, but require a minimum amount of tokens. 
+`minTokenBalane` lets us not only verify token ownership, but require a minimum number of tokens. 
 
 ## 9. Try it out!
 Now, when you run `npm run dev` from the command line and navigate to http://localhost:3000 in your browser you should have a working app that lets you tap on the “Connect Wallet” button to initiate a signing request and verify your wallet and token ownership.
