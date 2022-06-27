@@ -1,10 +1,10 @@
-import '../styles/globals.css'
+import "../styles/globals.css";
 import type { AppProps } from "next/app";
 
 import { PicketProvider } from "@picketapi/picket-react";
 
 // TODO: REPLACE_ME
-const apiKey = "pk_your_publishable_key_goes_here";
+const apiKey = "YOUR_PUBLISHABLE_KEY_GOES_HERE";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -15,4 +15,3 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 
 export default MyApp;
-
