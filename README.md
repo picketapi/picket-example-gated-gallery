@@ -308,16 +308,7 @@ You'll need to add your API Key in order to make this functional. Navigate to yo
 const apiKey = "YOUR_PUBLISHABLE_KEY_GOES_HERE";
 ```
 
-## 7. Whitelist our app's redirect URI
-
-Go back to your [Picket account dashboard](https://picketapi.com/dashboard) and click `Edit` on your project. Add the following redirect URI
-- http://localhost:3000/ (trailing slash matters!)
-
-After adding the redirect URI for our app, click the `Save` button to save your changes to the project. Nice! Now we are ready to add token ownership requirements.
-
-Note that if you host this project elsewhere (not on localhost) you will have to add a redirect url that matches the url of wherever your code is hosted. 
-
-## 8. Add Token Ownership Requirements
+## 7. Add Token Ownership Requirements
 
 To enforce token ownership, we pass the requirements to the [login](https://docs.picketapi.com/picket-docs/reference/libraries-and-sdks/javascript-library-picket-js#login) function. For this tutorial, we will use [CryptoKitties](https://opensea.io/collection/cryptokitties)) to token-gate our gallery. Users will need to own at least one CryptoKitty NFT token to access the gallery page. Picket works with any ERC-20, ERC-721 or ERC-1155 token on the `ethereum-mainnet` .  You'll want to pick a token contract that your wallet owns to test out the token-gating functionality yourself.
 
@@ -340,7 +331,7 @@ const loginRequirements = {
 ```
 `minTokenBalane` lets us not only verify token ownership, but require a minimum number of tokens. 
 
-## 9. Try it out!
+## 8. Try it out!
 Now, when you run `npm run dev` from the command line and navigate to http://localhost:3000 in your browser you should have a working app that lets you tap on the “Connect Wallet” button to initiate a signing request and verify your wallet and token ownership.
 
 If all goes well, and you meet the token ownership requirements, you'll see the following page: 
