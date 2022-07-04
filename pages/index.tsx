@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import galleryStyles from "../styles/Gallery.module.css";
 
 import { usePicket } from "@picketapi/picket-react";
 
@@ -26,8 +25,7 @@ const loginRequirements = {
 };
 
 const Home: NextPage = () => {
-  const { isAuthenticating, isAuthenticated, authState, logout, login } =
-    usePicket();
+  const { isAuthenticating, isAuthenticated, error, login } = usePicket();
 
   const router = useRouter();
 
@@ -53,13 +51,20 @@ const Home: NextPage = () => {
       <div className={styles.container}>
         <Header />
         <main className={styles.main}>
-          <h1 className={styles.title}>Connect your wallet to login</h1>
+          <h1 className={styles.title}>
+            Sign-In with Your Wallet to View the Gallery
+          </h1>
           <button
             className={styles.connectWalletButton}
             onClick={() => login(loginRequirements)}
           >
-            Connect Wallet
+            Sign-In with Your Wallet
           </button>
+          {error && (
+            <p className={styles.error}>
+              {"msg" in error ? error.msg : error.toString()}
+            </p>
+          )}
         </main>
       </div>
     );

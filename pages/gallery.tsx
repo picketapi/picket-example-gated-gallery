@@ -26,15 +26,34 @@ const images = [
 const Gallery: NextPage = () => {
   const router = useRouter();
 
-  const { isAuthenticated, authState, logout } = usePicket();
+  const { isAuthenticated, isAuthenticating, authState, logout } = usePicket();
 
   const onLogout = async () => {
     await logout();
     router.push("/");
   };
 
+  // naive loading state
+  if (isAuthenticating) {
+    return null;
+  }
+
   if (!isAuthenticated) {
-    return <p> Hello, you don{"'"}t have access to view this page.</p>;
+    return (
+      <div className={styles.container}>
+        <Head>
+          <title>Picket Hello World</title>
+          <meta name="description” content=“Saying hello to a web3 world" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <main className={styles.main}>
+          <p> Hello, you don{"'"}t have access to view this page.</p>
+          <button className={styles.btn} onClick={() => router.push("/")}>
+            Go Home to Sign-In
+          </button>
+        </main>
+      </div>
+    );
   }
 
   const { user } = authState;
@@ -51,7 +70,7 @@ const Gallery: NextPage = () => {
       <main className={styles.main}>
         <div className={styles.headerContainer}>
           <h2 className={styles.welcomeHeader}>Hey {displayAddress}</h2>
-          <button className={styles.logoutButton} onClick={onLogout}>
+          <button className={styles.btn} onClick={onLogout}>
             Logout
           </button>
         </div>
