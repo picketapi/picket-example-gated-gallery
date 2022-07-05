@@ -77,7 +77,7 @@ This page will be available at http://localhost:3000/gallery, but to access it, 
 
 ## 7. Add Token Ownership Requirements
 
-To enforce token ownership, we pass the requirements to the [login](https://docs.picketapi.com/picket-docs/reference/libraries-and-sdks/javascript-library-picket-js#login) function. For this tutorial, we will use [CryptoKitties](https://opensea.io/collection/cryptokitties)) to token-gate our gallery. Users will need to own at least one CryptoKitty NFT token to access the gallery page. Picket works with any ERC-20, ERC-721 or ERC-1155 token on the `ethereum-mainnet` . You'll want to pick a token contract that your wallet owns to test out the token-gating functionality yourself.
+To token-gate access, we need to enforce [token ownership on login](https://docs.picketapi.com/picket-docs/reference/libraries-and-sdks/javascript-library-picket-js#login). For this tutorial, we will use [CryptoKitties](https://opensea.io/collection/cryptokitties)) to token-gate our gallery. Users will need to own at least one CryptoKitty NFT token to access the gallery page. Picket works with any ERC-20, ERC-721 or ERC-1155 token on the `ethereum-mainnet` . You'll want to pick a token contract that your wallet owns to test out the token-gating functionality yourself.
 
 The contract address for CryptoKitties is: `0x06012c8cf97BEaD5deAe237070F9587f8E7A266d`
 
@@ -96,8 +96,6 @@ const loginRequirements = {
   minTokenBalance: 1,
 };
 ```
-`minTokenBalane` lets us not only verify token ownership, but require a minimum number of tokens. 
-
 ## 8. Try it out!
 Now, when you run `npm run dev` from the command line and navigate to http://localhost:3000 in your browser you should have a working app that lets you tap on the “Connect Wallet” button to initiate a signing request and verify your wallet and token ownership.
 
