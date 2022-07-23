@@ -19,6 +19,8 @@ const images = [
     key={src}
     className={styles.galleryImage}
     src={src}
+    width={350}
+    height={350}
     alt="Gates, gators, and pickets"
   />
 ));
