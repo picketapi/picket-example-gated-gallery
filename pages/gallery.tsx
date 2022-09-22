@@ -51,7 +51,7 @@ const Gallery: NextPage = () => {
         <main className={styles.main}>
           <p> Hello, you don{"'"}t have access to view this page.</p>
           <button className={styles.btn} onClick={() => router.push("/")}>
-            Go Home to Sign-In
+            Go Home to Log In
           </button>
         </main>
       </div>

@@ -52,13 +52,13 @@ const Home: NextPage = () => {
         <Header />
         <main className={styles.main}>
           <h1 className={styles.title}>
-            Sign-In with Your Wallet to View the Gallery
+            Log In with Your Wallet to View the Gallery
           </h1>
           <button
             className={styles.connectWalletButton}
             onClick={() => login(loginRequirements)}
           >
-            Sign-In with Your Wallet
+            Log In with Your Wallet
           </button>
           {error && (
             <p className={styles.error}>
